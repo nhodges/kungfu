@@ -1,7 +1,14 @@
 import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/db";
+import { XConnectionCard } from "@/components/x-connection-card";
 
 export default async function SettingsPage() {
   const session = await auth();
+  const userId = session!.user!.id!;
+
+  const xConnection = await prisma.sourceConnection.findUnique({
+    where: { userId_source: { userId, source: "x" } },
+  });
 
   return (
     <div>
@@ -18,20 +25,10 @@ export default async function SettingsPage() {
 
       <section className="mb-8">
         <h2 className="text-lg font-semibold mb-3">Connected Sources</h2>
-        <div className="border border-gray-800 rounded-lg p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium">X (Twitter)</p>
-              <p className="text-sm text-gray-400">Import your X bookmarks</p>
-            </div>
-            <button
-              disabled
-              className="px-4 py-2 bg-gray-800 text-gray-400 rounded-lg cursor-not-allowed text-sm"
-            >
-              Connect X
-            </button>
-          </div>
-        </div>
+        <XConnectionCard
+          connected={!!xConnection}
+          username={xConnection?.sourceUsername ?? null}
+        />
       </section>
     </div>
   );

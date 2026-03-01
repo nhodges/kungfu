@@ -1,0 +1,18 @@
+{
+  "data": [
+    {
+      "id": "1234567892",
+      "text": "Final bookmark in the set. Great thread on system design.",
+      "author_id": "333",
+      "created_at": "2026-02-26T08:00:00.000Z"
+    }
+  ],
+  "includes": {
+    "users": [
+      { "id": "333", "name": "System Designer", "username": "sysdesign" }
+    ]
+  },
+  "meta": {
+    "result_count": 1
+  }
+}

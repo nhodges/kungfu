@@ -8,13 +8,78 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
+  id            String             @id @default(cuid())
+  email         String             @unique
   emailVerified DateTime?
   accounts      Account[]
   sessions      Session[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  connections   SourceConnection[]
+  bookmarks     Bookmark[]
+  syncJobs      SyncJob[]
+  apiKeys       ApiKey[]
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+}
+
+model SourceConnection {
+  id             String    @id @default(cuid())
+  source         String // "x", "instagram", "reddit"
+  sourceUserId   String
+  sourceUsername  String
+  accessToken    String // encrypted
+  refreshToken   String? // encrypted
+  tokenExpiresAt DateTime?
+  userId         String
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@unique([userId, source])
+}
+
+model Bookmark {
+  id           String   @id @default(cuid())
+  source       String
+  sourceId     String
+  url          String
+  content      String
+  authorName   String
+  authorHandle String
+  mediaUrls    String[]
+  metadata     Json     @default("{}")
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ingestedAt   DateTime @default(now())
+  createdAt    DateTime
+
+  @@unique([userId, source, sourceId])
+  @@index([userId, source])
+  @@index([userId, createdAt])
+}
+
+model SyncJob {
+  id               String    @id @default(cuid())
+  userId           String
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  source           String
+  status           String    @default("pending") // pending, running, completed, failed
+  cursor           String?
+  count            Int       @default(0)
+  error            String?
+  rateLimitResetAt DateTime?
+  startedAt        DateTime?
+  completedAt      DateTime?
+  createdAt        DateTime  @default(now())
+}
+
+model ApiKey {
+  id        String    @id @default(cuid())
+  keyHash   String    @unique
+  name      String
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lastUsed  DateTime?
+  createdAt DateTime  @default(now())
 }
 
 model Account {
